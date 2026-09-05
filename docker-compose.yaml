@@ -1,0 +1,45 @@
+services:
+  pretix:
+    build: .
+    image: pretix/standalone:flavor
+    container_name: pretix
+
+    command: all
+
+    ports:
+      - "127.0.0.1:8123:80"
+
+    volumes:
+      - /var/pretix-data:/data
+      - /etc/pretix:/etc/pretix
+      - /var/run/redis:/var/run/redis
+
+    sysctls:
+      net.core.somaxconn: "4096"
+
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17
+    container_name: pretix-postgres
+
+    environment:
+      POSTGRES_DB: pretix
+      POSTGRES_USER: pretix
+      POSTGRES_PASSWORD: PasswordHere
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+volumes:
+  postgres-data:
+  redis-data:
+        driver: local
